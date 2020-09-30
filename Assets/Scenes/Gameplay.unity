@@ -272,7 +272,7 @@ Transform:
   m_GameObject: {fileID: 128303136}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -12.17, y: -6.515, z: 42.55549}
-  m_LocalScale: {x: 4.6122637, y: 4.791384, z: 1}
+  m_LocalScale: {x: 4.612264, y: 4.791384, z: 1}
   m_Children:
   - {fileID: 519420032}
   m_Father: {fileID: 1371589319}
@@ -293,12 +293,13 @@ MonoBehaviour:
   speed: 10
   anim: {fileID: 128303139}
   jumpForce: 300
-  maxSpeed: 10
+  maxSpeed: 7
   bolsa: {fileID: 8274932441960956882, guid: 5e192e48cf0446f4b8beb5927eb7589b, type: 3}
   txt_highScore: {fileID: 1222983922}
   txt_life: {fileID: 293010275}
   txt_blood: {fileID: 510592979}
   up: {fileID: 128303144}
+  moveForce: 8
 --- !u!82 &128303143
 AudioSource:
   m_ObjectHideFlags: 0

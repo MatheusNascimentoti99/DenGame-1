@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +20,9 @@ public class Player : MonoBehaviour
     private int sangue = 0;
     private int vidas = 3;
     public AudioSource up;
+
+    public float moveForce;
+    private float hForce = 1;
 
 
     // Start is called before the first frame update
@@ -43,26 +47,26 @@ public class Player : MonoBehaviour
 
     private void move()
     {
-        Vector2 position = this.transform.position;
-        Vector3 player = this.transform.localScale;
-        if (Input.GetButton("Horizontal") && Input.GetAxisRaw("Horizontal") > 0)
+        float axis = Input.GetAxis("Horizontal") * Time.deltaTime;
+        if (axis != 0)
         {
-            player.x = 4.612264f;
-            this.transform.localScale = player;
-            anim.SetInteger("flow", 3);
-            position.x += Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime;          
-        } else if(Input.GetButton("Horizontal") && Input.GetAxisRaw("Horizontal") < 0)
-        {
-            player.x = -4.612264f;
-            this.transform.localScale = player;
-            anim.SetInteger("flow", 3);
-            position.x += Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime;
-        } else
-        {
-            anim.SetInteger("flow", 2);
+            rb2d.AddForce(Vector2.right * hForce * moveForce * Math.Abs(axis)/axis);
+            Debug.Log(rb2d.velocity.x);
+            if (Math.Abs(rb2d.velocity.x) > maxSpeed)
+            {
+
+                rb2d.velocity = new Vector2(maxSpeed * Math.Abs(axis) / axis, rb2d.velocity.y);
+
+            }
+            
+            Vector3 myScale = this.transform.localScale;
+            myScale.x = Math.Abs(myScale.x) *Math.Abs(axis)/axis;
+            this.transform.localScale = myScale;
+
         }
-        this.transform.position = position;
+        anim.SetFloat("speed", Math.Abs(rb2d.velocity.x));
     }
+
 
     private void jump()
     {
