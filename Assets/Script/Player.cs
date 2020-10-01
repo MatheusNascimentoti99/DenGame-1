@@ -18,8 +18,11 @@ public class Player : MonoBehaviour
     public Text txt_meta;
     public Text txt_life;
     public Text txt_blood;
+    public Text txt_lose;
+    public Text txt_win;
     private int sangue = 0;
     private int vidas = 3;
+    private int meta = 3;
     
     //Moviment
     public int speed;
@@ -36,7 +39,9 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
         anim.SetInteger("flow", 0);
         UpHighScore();
-    }
+        txt_lose.enabled = false;
+        txt_win.enabled = false;
+}
 
     // Update is called once per frame
     void Update()
@@ -46,7 +51,11 @@ public class Player : MonoBehaviour
         if (vidas <= 0)
         {
             LevelManager.levelManeger.Gameover(sangue);
+        } else if (txt_lose.enabled && Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            txt_lose.enabled = false;
         }
+        
     }
 
     private void move()
@@ -58,15 +67,11 @@ public class Player : MonoBehaviour
             Debug.Log(rb2d.velocity.x);
             if (Math.Abs(rb2d.velocity.x) > maxSpeed)
             {
-
                 rb2d.velocity = new Vector2(maxSpeed * Math.Abs(axis) / axis, rb2d.velocity.y);
-
             }
-            
             Vector3 myScale = this.transform.localScale;
             myScale.x = Math.Abs(myScale.x) *Math.Abs(axis)/axis;
             this.transform.localScale = myScale;
-
         }
         anim.SetFloat("speed", Math.Abs(rb2d.velocity.x));
     }
@@ -112,7 +117,17 @@ public class Player : MonoBehaviour
             upSangue();
         } else if (collision.gameObject.tag == "Doc")
         {
-            LevelManager.levelManeger.Gameover(sangue);
+            if (sangue >= meta)
+            {
+                txt_win.enabled = true;
+                Time.timeScale = 0;
+                AudioListener.pause = true;
+            }
+            else
+            {
+                txt_lose.enabled = true;
+            }            
+            //LevelManager.levelManeger.Gameover(sangue);
         }
     }
 
