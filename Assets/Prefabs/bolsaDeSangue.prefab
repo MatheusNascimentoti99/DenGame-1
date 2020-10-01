@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9038087509422371012}
   - component: {fileID: 8731739935329414417}
   - component: {fileID: -6190501182151014782}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: bolsaDeSangue
   m_TagString: Sangue
   m_Icon: {fileID: 0}

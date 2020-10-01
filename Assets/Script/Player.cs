@@ -7,23 +7,27 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public int speed;
+    //Objects
     public Animator anim;
-    public float jumpForce = 700;
+    public AudioSource up;
+    public ParticleSystem boom;
     private Rigidbody2D rb2d;
-    private bool grounded = true;
-    public float maxSpeed = 10;
     public GameObject bolsa;
-    public Text txt_highScore;
+
+    //HUD
+    public Text txt_meta;
     public Text txt_life;
     public Text txt_blood;
     private int sangue = 0;
     private int vidas = 3;
-    public AudioSource up;
-
+    
+    //Moviment
+    public int speed;
+    public float jumpForce = 350;
+    private bool grounded = true;
+    public float maxSpeed = 10;
     public float moveForce;
     private float hForce = 1;
-
 
     // Start is called before the first frame update
     void Start()
@@ -70,8 +74,9 @@ public class Player : MonoBehaviour
 
     private void jump()
     {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow) && grounded)
         {
+            this.gameObject.tag = "Ataque";
             grounded = false;
             anim.SetInteger("flow", 1);
             rb2d.AddForce(new Vector2(0, jumpForce));
@@ -82,17 +87,22 @@ public class Player : MonoBehaviour
     {
         if (collision.gameObject.tag == "Ground")
         {
+            this.gameObject.tag = "Player";
             grounded = true;
             anim.SetInteger("flow", 2);
         }
-        else if (collision.gameObject.tag == "Enemy")
+        else if (collision.gameObject.tag == "Enemy" && this.gameObject.tag == "Player")
+        {
+            decrementLife();
+        }
+        else if (collision.gameObject.tag == "Enemy" && this.gameObject.tag == "Ataque")
         {
             Vector2 bolsaDrop = collision.gameObject.transform.position;
             bolsaDrop.x += 2;
             GetComponent<AudioSource>().Play();
+            boom.Play();
             Destroy(collision.gameObject);
             Instantiate(bolsa, bolsaDrop, Quaternion.identity);
-
         }
         else if (collision.gameObject.tag == "Sangue")
         {
@@ -100,6 +110,9 @@ public class Player : MonoBehaviour
             Destroy(collision.gameObject);
             incrementSangue();
             upSangue();
+        } else if (collision.gameObject.tag == "Doc")
+        {
+            LevelManager.levelManeger.Gameover(sangue);
         }
     }
 
@@ -114,11 +127,15 @@ public class Player : MonoBehaviour
 
     private void UpHighScore()
     {
-        txt_highScore.text = "HighScore: " + LevelManager.levelManeger.GetHighScore();
+        txt_meta.text = "Meta: " + LevelManager.levelManeger.GetHighScore(); //Meta do nível
     }
     public void decrementLife()
     {
         this.vidas -= 1;
+        lessLife();
     }
-
+    private void lessLife()
+    {
+        txt_life.text = "Vidas: " + vidas;
+    }
 }
