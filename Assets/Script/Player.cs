@@ -15,16 +15,13 @@ public class Player : MonoBehaviour
     public GameObject bolsa;
 
     //HUD
-    public Text txt_meta;
     public Text txt_life;
     public Text txt_blood;
-    public Text txt_lose;
-    public Text txt_win;
-    private int sangue = 0;
-    private int vidas = 3;
-    private int meta = 3;
-    
+    private int sangue;
+    private int vidas;
+
     //Moviment
+    public int hForceShot;
     public int speed;
     public float jumpForce = 350;
     private bool grounded = true;
@@ -35,27 +32,27 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb2d = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
+        rb2d = this.GetComponent<Rigidbody2D>();
+        anim = this.GetComponent<Animator>();
         anim.SetInteger("flow", 0);
-        UpHighScore();
-        txt_lose.enabled = false;
-        txt_win.enabled = false;
-}
+        vidas = GameController.gameController.GetLifecorrent();
+        sangue = GameController.gameController.GetScoreCorrent();
+        upSangue();
+        lessLife();
+
+
+    }
 
     // Update is called once per frame
     void Update()
     {
         move();
         jump();
-        if (vidas <= 0)
-        {
-            LevelManager.levelManeger.Gameover(sangue);
-        } else if (txt_lose.enabled && Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            txt_lose.enabled = false;
-        }
-        
+        LevelManager.levelManeger.CheckGameover(sangue, vidas);
+        LevelManager.levelManeger.CheckReturnNoFinish();
+        LevelManager.levelManeger.CheckPause();
+
+
     }
 
     private void move()
@@ -90,17 +87,20 @@ public class Player : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Ground")
+        if (collision.gameObject.CompareTag("Ground"))
         {
             this.gameObject.tag = "Player";
             grounded = true;
             anim.SetInteger("flow", 2);
         }
-        else if (collision.gameObject.tag == "Enemy" && this.gameObject.tag == "Player")
+        else if (collision.gameObject.CompareTag("Enemy") && this.gameObject.CompareTag("Player"))
         {
+
+            rb2d.velocity = new Vector2(0,0);
+            rb2d.AddForce(new Vector2(-rb2d.centerOfMass.x/Math.Abs(rb2d.centerOfMass.x)*3, 3), ForceMode2D.Impulse);
             decrementLife();
         }
-        else if (collision.gameObject.tag == "Enemy" && this.gameObject.tag == "Ataque")
+        else if (collision.gameObject.CompareTag("Enemy") && this.gameObject.CompareTag("Ataque"))
         {
             Vector2 bolsaDrop = collision.gameObject.transform.position;
             bolsaDrop.x += 2;
@@ -109,24 +109,9 @@ public class Player : MonoBehaviour
             Destroy(collision.gameObject);
             Instantiate(bolsa, bolsaDrop, Quaternion.identity);
         }
-        else if (collision.gameObject.tag == "Sangue")
+         else if (collision.gameObject.CompareTag("Doc"))
         {
-            up.Play();
-            Destroy(collision.gameObject);
-            incrementSangue();
-            upSangue();
-        } else if (collision.gameObject.tag == "Doc")
-        {
-            if (sangue >= meta)
-            {
-                txt_win.enabled = true;
-                Time.timeScale = 0;
-                AudioListener.pause = true;
-            }
-            else
-            {
-                txt_lose.enabled = true;
-            }            
+            LevelManager.levelManeger.CheckMeta(sangue, vidas);
             //LevelManager.levelManeger.Gameover(sangue);
         }
     }
@@ -140,10 +125,6 @@ public class Player : MonoBehaviour
         this.sangue += 1;
     }
 
-    private void UpHighScore()
-    {
-        txt_meta.text = "Meta: " + LevelManager.levelManeger.GetHighScore(); //Meta do nível
-    }
     public void decrementLife()
     {
         this.vidas -= 1;
@@ -153,4 +134,5 @@ public class Player : MonoBehaviour
     {
         txt_life.text = "Vidas: " + vidas;
     }
+
 }
