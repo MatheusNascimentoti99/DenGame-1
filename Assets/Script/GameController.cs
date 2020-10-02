@@ -32,10 +32,7 @@ public class GameController : MonoBehaviour
 
     public void NextLevel()
     {
-        if(levelCorrent < levelMax)
-        {
             levelCorrent++;
-        }
     }
 
     private void Awake()
@@ -85,9 +82,10 @@ public class GameController : MonoBehaviour
         this.scoreCorrent = score;
     }
 
-    public void Reset()
+    public void ResetGame()
     {
         lifeCorrent = 3;
         scoreCorrent = 0;
+        levelCorrent = 1;
     }
 }

@@ -12,7 +12,7 @@ public class LevelManager : MonoBehaviour
     private int highScore = 0;
     private bool isPause;
     public int meta;
-    public Text txt_meta;
+    public Text txt_infoLevel;
 
 
     // Start is called before the first frame update
@@ -42,6 +42,7 @@ public class LevelManager : MonoBehaviour
             AudioListener.pause = false;
             if (GameController.gameController.OverLevelMax())
             {
+                GameController.gameController.ResetGame();
                 txt_win.GetComponentsInChildren<Text>()[0].text = "Você concluiu todas as Fases";
                 MenuController.LoadHome();
             }
@@ -69,7 +70,7 @@ public class LevelManager : MonoBehaviour
     {
         if (life <= 0)
         {
-            GameController.gameController.Reset();
+            GameController.gameController.ResetGame();
             txt_gameOver.SetActive(true);
             Time.timeScale = 0;
             AudioListener.pause = true;
@@ -126,7 +127,7 @@ public class LevelManager : MonoBehaviour
     }
     private void UpHighScore()
     {
-        txt_meta.text = "Meta: " + LevelManager.levelManeger.GetMeta(); //Meta do nível
+        txt_infoLevel.text = "Meta: " + LevelManager.levelManeger.GetMeta()  + "    Level:" + GameController.gameController.getLevelCorrent(); //Meta do nível
     }
 
     private int GetMeta()
