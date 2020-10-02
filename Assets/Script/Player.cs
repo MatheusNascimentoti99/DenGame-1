@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,28 +7,40 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public int speed;
+    //Objects
     public Animator anim;
-    public float jumpForce = 700;
+    public AudioSource up;
+    public ParticleSystem boom;
     private Rigidbody2D rb2d;
-    private bool grounded = true;
-    public float maxSpeed = 10;
     public GameObject bolsa;
-    public Text txt_highScore;
+
+    //HUD
     public Text txt_life;
     public Text txt_blood;
-    private int sangue = 0;
-    private int vidas = 3;
-    public AudioSource up;
+    private int sangue;
+    private int vidas;
 
+    //Moviment
+    public int hForceShot;
+    public int speed;
+    public float jumpForce = 350;
+    private bool grounded = true;
+    public float maxSpeed = 10;
+    public float moveForce;
+    private float hForce = 1;
 
     // Start is called before the first frame update
     void Start()
     {
-        rb2d = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
+        rb2d = this.GetComponent<Rigidbody2D>();
+        anim = this.GetComponent<Animator>();
         anim.SetInteger("flow", 0);
-        UpHighScore();
+        vidas = GameController.gameController.GetLifecorrent();
+        sangue = GameController.gameController.GetScoreCorrent();
+        upSangue();
+        lessLife();
+
+
     }
 
     // Update is called once per frame
@@ -35,39 +48,37 @@ public class Player : MonoBehaviour
     {
         move();
         jump();
-        if (vidas <= 0)
-        {
-            LevelManager.levelManeger.Gameover(sangue);
-        }
+        LevelManager.levelManeger.CheckGameover(sangue, vidas);
+        LevelManager.levelManeger.CheckReturnNoFinish();
+        LevelManager.levelManeger.CheckPause();
+
+
     }
 
     private void move()
     {
-        Vector2 position = this.transform.position;
-        Vector3 player = this.transform.localScale;
-        if (Input.GetButton("Horizontal") && Input.GetAxisRaw("Horizontal") > 0)
+        float axis = Input.GetAxis("Horizontal") * Time.deltaTime;
+        if (axis != 0)
         {
-            player.x = 4.612264f;
-            this.transform.localScale = player;
-            anim.SetInteger("flow", 3);
-            position.x += Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime;          
-        } else if(Input.GetButton("Horizontal") && Input.GetAxisRaw("Horizontal") < 0)
-        {
-            player.x = -4.612264f;
-            this.transform.localScale = player;
-            anim.SetInteger("flow", 3);
-            position.x += Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime;
-        } else
-        {
-            anim.SetInteger("flow", 2);
+            rb2d.AddForce(Vector2.right * hForce * moveForce * Math.Abs(axis)/axis);
+            Debug.Log(rb2d.velocity.x);
+            if (Math.Abs(rb2d.velocity.x) > maxSpeed)
+            {
+                rb2d.velocity = new Vector2(maxSpeed * Math.Abs(axis) / axis, rb2d.velocity.y);
+            }
+            Vector3 myScale = this.transform.localScale;
+            myScale.x = Math.Abs(myScale.x) *Math.Abs(axis)/axis;
+            this.transform.localScale = myScale;
         }
-        this.transform.position = position;
+        anim.SetFloat("speed", Math.Abs(rb2d.velocity.x));
     }
+
 
     private void jump()
     {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow) && grounded)
         {
+            this.gameObject.tag = "Ataque";
             grounded = false;
             anim.SetInteger("flow", 1);
             rb2d.AddForce(new Vector2(0, jumpForce));
@@ -76,26 +87,32 @@ public class Player : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Ground")
+        if (collision.gameObject.CompareTag("Ground"))
         {
+            this.gameObject.tag = "Player";
             grounded = true;
             anim.SetInteger("flow", 2);
         }
-        else if (collision.gameObject.tag == "Enemy")
+        else if (collision.gameObject.CompareTag("Enemy") && this.gameObject.CompareTag("Player"))
+        {
+
+            rb2d.velocity = new Vector2(0,0);
+            rb2d.AddForce(new Vector2(-rb2d.centerOfMass.x/Math.Abs(rb2d.centerOfMass.x)*3, 3), ForceMode2D.Impulse);
+            decrementLife();
+        }
+        else if (collision.gameObject.CompareTag("Enemy") && this.gameObject.CompareTag("Ataque"))
         {
             Vector2 bolsaDrop = collision.gameObject.transform.position;
             bolsaDrop.x += 2;
             GetComponent<AudioSource>().Play();
+            boom.Play();
             Destroy(collision.gameObject);
             Instantiate(bolsa, bolsaDrop, Quaternion.identity);
-
         }
-        else if (collision.gameObject.tag == "Sangue")
+         else if (collision.gameObject.CompareTag("Doc"))
         {
-            up.Play();
-            Destroy(collision.gameObject);
-            incrementSangue();
-            upSangue();
+            LevelManager.levelManeger.CheckMeta(sangue, vidas);
+            //LevelManager.levelManeger.Gameover(sangue);
         }
     }
 
@@ -108,13 +125,14 @@ public class Player : MonoBehaviour
         this.sangue += 1;
     }
 
-    private void UpHighScore()
-    {
-        txt_highScore.text = "HighScore: " + LevelManager.levelManeger.GetHighScore();
-    }
     public void decrementLife()
     {
         this.vidas -= 1;
+        lessLife();
+    }
+    private void lessLife()
+    {
+        txt_life.text = "Vidas: " + vidas;
     }
 
 }

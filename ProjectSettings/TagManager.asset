@@ -7,6 +7,8 @@ TagManager:
   - Ground
   - Enemy
   - Sangue
+  - Doc
+  - Ataque
   layers:
   - Default
   - TransparentFX

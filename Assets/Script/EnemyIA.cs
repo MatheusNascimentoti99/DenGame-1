@@ -10,49 +10,46 @@ public class EnemyIA : MonoBehaviour
 {
 
     public int speed;
-    private int control = 0;
+    public Rigidbody2D rb2d;
+    private int directions;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        faceRight();
     }
 
     // Update is called once per frame
     void Update()
     {
-        //move();
+        
+        
+    }
+
+    private void FixedUpdate()
+    {
+        move();
     }
 
     private void move() {
+        rb2d.velocity = new Vector2(speed * directions, rb2d.velocity.y);
+    }
 
-        Vector2 position = this.transform.position;
-
-        if (control==0) {
-            for (int i = 1; i <= 5; i++)
-            {
-                faceRight();
-                position.x += i * speed * Time.deltaTime;
-                this.transform.position = position;
-            }
-            control++;
-        } else if (control==1) {
-            for (int i = 1; i <= 5; i++)
-            {
-                faceLeft();
-                position.x -= i * speed * Time.deltaTime;
-                this.transform.position = position;
-            }
-            control++;
-        } else
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (directions == 1)
         {
-            control = 0;
+            faceLeft();
         }
-
+        else
+        {
+            faceRight();
+        }
     }
 
     private void faceRight()
     {
+        directions = 1;
         Vector3 mosquito = this.transform.localScale;
         mosquito.x = -0.45104f;
         this.transform.localScale = mosquito;
@@ -60,10 +57,9 @@ public class EnemyIA : MonoBehaviour
 
     private void faceLeft()
     {
+        directions = -1;
         Vector3 mosquito = this.transform.localScale;
         mosquito.x = 0.45104f;
         this.transform.localScale = mosquito;
     }
-
-
 }
