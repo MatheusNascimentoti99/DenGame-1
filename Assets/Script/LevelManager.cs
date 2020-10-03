@@ -1,5 +1,4 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -42,8 +41,8 @@ public class LevelManager : MonoBehaviour
             AudioListener.pause = false;
             if (GameController.gameController.OverLevelMax())
             {
-                GameController.gameController.ResetGame();
                 txt_win.GetComponentsInChildren<Text>()[0].text = "Você concluiu todas as Fases";
+                GameController.gameController.ResetGame();                
                 MenuController.LoadHome();
             }
             else
@@ -52,6 +51,7 @@ public class LevelManager : MonoBehaviour
 
             }
         }
+
     }
 
     private void Awake()
@@ -110,7 +110,7 @@ public class LevelManager : MonoBehaviour
 
     public void CheckPause()
     {
-        if (Input.GetKey(KeyCode.V))
+        if (Input.GetKeyDown(KeyCode.V))
         {
             isPause = !isPause;
             if (isPause)
