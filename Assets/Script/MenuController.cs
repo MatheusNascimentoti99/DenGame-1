@@ -39,7 +39,7 @@ public class MenuController : MonoBehaviour
     public static void Exit()
     {
         Application.Quit(0);
-        EditorApplication.isPlaying = false;
+        //EditorApplication.isPlaying = false;
     }
 
 }
